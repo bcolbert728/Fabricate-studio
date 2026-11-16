@@ -1,0 +1,23 @@
+---
+import { getCollection, render } from 'astro:content';
+import { tpl, fill, esc, sortPosts, postVars } from '../../lib/template';
+
+export async function getStaticPaths() {
+  const posts = sortPosts(await getCollection('journal'));
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+
+const vars = {
+  ...postVars(post),
+  prev: newer ? fill(tpl('prev'), { href: `/journal/${newer.id}`, title: esc(newer.data.title) }) : '',
+  next: older ? fill(tpl('next'), { href: `/journal/${older.id}`, title: esc(older.data.title) }) : '',
+};
+const [before, after] = tpl('post').split('{{body}}');
+---
+<Fragment set:html={fill(before, vars)} /><Content /><Fragment set:html={fill(after, vars)} />

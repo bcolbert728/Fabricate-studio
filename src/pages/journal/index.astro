@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import { tpl, fill, sortPosts, postVars } from '../../lib/template';
+
+const posts = sortPosts(await getCollection('journal'));
+const card = tpl('card');
+const html = fill(tpl('index'), {
+  cards: posts.map((p) => fill(card, postVars(p))).join(''),
+  pageTitle: 'Journal - Fabricate.Studio - Generative AI Retail, Product and Brand marketing',
+  canonical: 'https://fabricate.studio/journal',
+});
+---
+<Fragment set:html={html} />
